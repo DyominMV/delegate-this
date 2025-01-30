@@ -3,6 +3,7 @@ package mikhail.dyomin.delegatethis.bytecode
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import kotlin.math.max
 
 private data class ConstructorData(
     val access: Int,
@@ -16,6 +17,18 @@ internal class DelegatorModifierAdapter(
     delegateVisitor: ClassVisitor
 ) : ClassVisitor(Opcodes.ASM9, delegateVisitor) {
     private val constructors = mutableListOf<ConstructorData>()
+
+    override fun visit(
+        version: Int,
+        access: Int,
+        name: String?,
+        signature: String?,
+        superName: String?,
+        interfaces: Array<out String>?
+    ) {
+        val newVersion = max(Opcodes.V1_5, version)
+        super.visit(newVersion, access, name, signature, superName, interfaces)
+    }
 
     // mark all constructors, make marked constructors private
     override fun visitMethod(
@@ -48,6 +61,7 @@ internal class DelegatorModifierAdapter(
     override fun visitEnd() {
         addDelegateThisMethod()
         constructors.forEach { restoreNonMarkedConstructor(it) }
+        visitAnnotation("mikhail/dyomin/delegatethis/Modified", true).apply { visitEnd() }
         super.visitEnd()
     }
 

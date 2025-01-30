@@ -1,10 +1,7 @@
 package mikhail.dyomin.delegatethis.bytecode
 
-import org.objectweb.asm.ClassReader
+import org.objectweb.asm.*
 import org.objectweb.asm.ClassReader.*
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
 
 private fun Int.mask(mask: Int): Boolean = (this and mask) == mask
 
@@ -53,17 +50,39 @@ internal class ClassFileFactory(
             return delegateClasses[className]!!
         }
 
-        val delegateFieldDescriptors: Map<String, String> by lazy { readDelegateFieldDescriptors() }
+        private var _alreadyModified: Boolean? = null
+        val alreadyModified: Boolean get() {
+            if (null == _alreadyModified) {
+                checkModifiedAndGetDelegateFieldDescriptors()
+            }
+            return _alreadyModified!!
+        }
 
-        private fun readDelegateFieldDescriptors() = object : ClassVisitor(Opcodes.ASM9) {
+        private var _delegateFieldDescriptors: Map<String, String>? = null
+        val delegateFieldDescriptors: Map<String, String> get() {
+            if (null == _delegateFieldDescriptors) {
+                checkModifiedAndGetDelegateFieldDescriptors()
+            }
+            return _delegateFieldDescriptors!!
+        }
+
+        private fun checkModifiedAndGetDelegateFieldDescriptors() = object: ClassVisitor(Opcodes.ASM9) {
+            var modified = false
             val fieldDescriptors = mutableMapOf<String, String>()
+            override fun visitAnnotation(descriptor: String?, visible: Boolean) =
+                super.visitAnnotation(descriptor, visible).also {
+                    modified = (modified || (descriptor == "mikhail/dyomin/delegatethis/Modified"))
+                }
             override fun visitField(access: Int, name: String?, descriptor: String?, s: String?, v: Any?): Nothing? {
                 if (fieldIsDelegate(access, name, descriptor)) {
                     fieldDescriptors[name!!] = descriptor!!
                 }
                 return null
             }
-        }.visitBytesIgnoringMethods().fieldDescriptors
+        }.visitBytesIgnoringMethods().apply {
+            _alreadyModified = modified
+            _delegateFieldDescriptors = fieldDescriptors
+        }
 
         private fun fieldIsDelegate(access: Int, name: String?, descriptor: String?): Boolean {
             if (descriptor == null || name == null) {
