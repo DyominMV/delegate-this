@@ -8,23 +8,23 @@ import java.nio.file.Path
 import kotlin.io.path.absolute
 
 abstract class DelegateThisMojoBase : AbstractMojo() {
-    protected lateinit var directoryWithClasses: Path
+    protected lateinit var directoriesWithClasses: List<Path>
 
-    override fun execute() = DelegateThis(directoryWithClasses).execute()
+    override fun execute() = DelegateThis(directoriesWithClasses).execute()
 }
 
 /**
  * @goal transform-delegators
  * @phase process-classes
  */
-@Mojo(name = "transform-delegators", requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME)
+@Mojo(name = "transform-delegators", requiresDependencyCollection = ResolutionScope.RUNTIME_PLUS_SYSTEM)
 class DelegateThisMojo : DelegateThisMojoBase() {
     /**
-     * directory with `*.class` files produced by compiler (default value: `${project.build.outputDirectory}`)
+     * directories with `*.class` files produced by compiler (default value: `${project.build.outputDirectory}`)
      */
     @Parameter(readonly = false, defaultValue = "\${project.build.outputDirectory}")
-    private fun setBuildOutputDirectory(dir: String) {
-        this.directoryWithClasses = Path.of(dir).absolute()
+    fun setBuildOutputDirectories(dirs: List<String>) {
+        this.directoriesWithClasses = dirs.map { Path.of(it).absolute() }
     }
 }
 
@@ -35,10 +35,14 @@ class DelegateThisMojo : DelegateThisMojoBase() {
 @Mojo(name = "transform-delegators-test", requiresDependencyCollection = ResolutionScope.TEST)
 class DelegateThisTestsMojo : DelegateThisMojoBase() {
     /**
-     * directory with `*.class` files produced by compiler (default value: `${project.build.testOutputDirectory}`)
+     * directories with `*.class` files produced by compiler (default value:
+     * `${project.build.testOutputDirectory},${project.build.outputDirectory}`)
      */
-    @Parameter(readonly = false, defaultValue = "\${project.build.testOutputDirectory}")
-    private fun setBuildTestOutputDirectory(dir: String) {
-        this.directoryWithClasses = Path.of(dir).absolute()
+    @Parameter(
+        readonly = false,
+        defaultValue = "\${project.build.testOutputDirectory},\${project.build.outputDirectory}"
+    )
+    fun setBuildTestOutputDirectories(dirs: List<String>) {
+        this.directoriesWithClasses = dirs.map { Path.of(it).absolute() }
     }
 }

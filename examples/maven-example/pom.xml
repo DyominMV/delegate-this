@@ -6,7 +6,7 @@
 
     <name>${project.artifactId}</name>
     <groupId>mikhail.dyomin</groupId>
-    <artifactId>delegate-this-plugin-base</artifactId>
+    <artifactId>maven-example</artifactId>
     <version>1.0.0</version>
 
     <properties>
@@ -53,15 +53,21 @@
                 </configuration>
                 <version>3.13.0</version>
             </plugin>
+            <plugin>
+                <groupId>mikhail.dyomin</groupId>
+                <artifactId>delegate-this-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <phase>test-compile</phase>
+                        <goals><goal>transform-delegators-test</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>9.7</version>
-        </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit5</artifactId>
@@ -83,7 +89,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>delegate-this</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
