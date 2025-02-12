@@ -1,22 +1,10 @@
 package mikhail.dyomin.mavenexample
 
-import mikhail.dyomin.mavenexample.ComparedProperty.Companion.comparedProperty
-import mikhail.dyomin.mavenexample.Property.Companion.property
 import org.junit.jupiter.api.Test
-import kotlin.reflect.KProperty0
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
-
-class SampleWithVariable(
-    var memes: String
-) : EqualsHashcodeAndComparable<SampleWithVariable> by comparedProperty(SampleWithVariable::memes),
-    ToString by property(SampleWithVariable::id) {
-    val id: Int = nextId.also { nextId += 1 }
-
-    companion object {
-        private var nextId: Int = 1
-    }
-}
+import kotlin.test.assertTrue
 
 class DelegatePluginTest {
     @Test
@@ -32,12 +20,17 @@ class DelegatePluginTest {
         assertEquals(sample1, sample2)
         assertEquals(sample1.hashCode(), sample2.hashCode())
         assertEquals(sample1.hashCode(), "sample".hashCode())
-    }
-}
 
-fun main() {
-    println(SampleWithVariable::memes)
-    val s = SampleWithVariable("ss")
-    val x: KProperty0<*> = s::memes
-    println(x.name)
+        assertContains(sample1.toString(), "1")
+        assertContains(sample2.toString(), "2")
+    }
+
+    @Test
+    fun `Comparable{String} should be delegated to computed shrimpsId`() {
+        val shrimper = Shrimper(representation = "🦐", count = 7)
+        assertTrue { shrimper > 5 }
+        shrimper.count = 4
+        assertTrue { shrimper < 5 }
+
+    }
 }

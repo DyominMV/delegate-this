@@ -83,7 +83,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>delegate-this</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

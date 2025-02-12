@@ -1,5 +1,6 @@
 package mikhail.dyomin.delegatethis.bytecode
 
+import mikhail.dyomin.delegatethis.AlreadyModified
 import mikhail.dyomin.delegatethis.samples.NameExtractorDelegate
 import mikhail.dyomin.delegatethis.samples.SampleInterface
 import mikhail.dyomin.delegatethis.samples.loadClass
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassWriter
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Modifier
 import kotlin.test.assertNotNull
@@ -63,6 +63,13 @@ class DelegatorModifierAdapterTest {
         }
     }
 
+
+    @ParameterizedTest
+    @MethodSource("classes with delegate")
+    fun `DelegatorModifierAdapter should add annotation to a class`(modifiedClass: Class<*>) {
+        assertTrue { modifiedClass.isAnnotationPresent(AlreadyModified::class.java) }
+    }
+
     companion object {
         private val sampleClassNames = listOf(
             "mikhail.dyomin.delegatethis.samples.ClassWithDeeperDelegate",
@@ -76,17 +83,10 @@ class DelegatorModifierAdapterTest {
         @BeforeAll
         @JvmStatic
         fun `modify and load all sample classes`() {
-            val factory = ClassFileFactory { name -> ClassReader(name) }
 
             sampleClassNames.forEach { className ->
-                val reader = factory.getClassFile(className).createReader()
-                val writer = ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
-                reader.accept(
-                    DelegatorModifierAdapter(factory.getClassFile(className), writer),
-                    0
-                )
-
-                loadClass(writer.toByteArray())
+                val reader = ClassReader(className)
+                loadClass(reader.getModifiedBytes())
             }
         }
     }

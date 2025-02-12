@@ -1,9 +1,8 @@
 package mikhail.dyomin.delegatethis
 
-import mikhail.dyomin.delegatethis.bytecode.ClassFileFactory
-import mikhail.dyomin.delegatethis.bytecode.DelegatorModifierAdapter
+import mikhail.dyomin.delegatethis.bytecode.getAnnotations
+import mikhail.dyomin.delegatethis.bytecode.getModifiedBytes
 import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassWriter
 import java.io.File
 import java.io.InputStream
 import java.nio.file.Path
@@ -17,24 +16,7 @@ class DelegateThis(
 ) {
     private val classLoader = this::class.java.classLoader
 
-    private val classFileFactory = ClassFileFactory { className ->
-        val classFileName = className
-            .replace("\\.".toRegex(), File.separator)
-            .replace("<.+$".toRegex(), "")
-            .plus(".class")
-
-        val inputStream: InputStream = classFileName
-            .let { classesRoots.map { root -> root.resolve(it) } }
-            .find { it.exists() && it.isRegularFile() }
-            ?.inputStream()
-            ?: ClassLoader.getSystemResourceAsStream(classFileName)
-            ?: classLoader.getResource(classFileName)?.openStream()
-            ?: throw RuntimeException("Could not get resource of class $className")
-
-        ClassReader(inputStream)
-    }
-
-    private val classFiles = classesRoots.flatMap { root ->
+    private val classNamesByPaths = classesRoots.flatMap { root ->
         root.toFile().walkTopDown()
             .filter { it.isFile && it.extension == "class" }
             .map { it.toPath() }
@@ -45,24 +27,40 @@ class DelegateThis(
                     .replace(File.separator, ".")
 
                 object {
+                    val className = className
                     val classFilePath = path
-                    val classFile = classFileFactory.getClassFile(className)
                 }
             }
-    }.associate { it.classFilePath to it.classFile }
+    }.associate { it.classFilePath to it.className }
 
-    fun execute() = classFiles.forEach { (classFilePath, classFile) ->
-        if (!classFile.alreadyModified && classFile.delegateFieldDescriptors.isNotEmpty()) {
-            classFilePath.writeBytes(modifyDelegator(classFile))
+    fun execute() = classNamesByPaths.forEach { (classFilePath, className) ->
+        val classReader = getClassReader(className)
+        val annotations = classReader.getAnnotations()
+        if (!annotations.contains(ALREADY_MODIFIED) && annotations.contains(DELEGATE_THIS)) {
+            classFilePath.writeBytes(classReader.getModifiedBytes())
         }
     }
 
-    private fun modifyDelegator(classFile: ClassFileFactory.ClassFile): ByteArray {
-        val reader = classFile.createReader()
-        val writer = ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
-        val visitor = DelegatorModifierAdapter(classFile, writer)
-        reader.accept(visitor, 0)
+    private fun getClassReader(className: String): ClassReader {
+        val classResourceName = className
+            .replace("\\.".toRegex(), "/")
+            .replace("<.+$".toRegex(), "")
+            .plus(".class")
 
-        return writer.toByteArray()
+        val inputStream: InputStream = classResourceName
+            .replace("/", File.separator)
+            .let { classesRoots.map { root -> root.resolve(it) } }
+            .find { it.exists() && it.isRegularFile() }
+            ?.inputStream()
+            ?: ClassLoader.getSystemResource(classResourceName)?.openStream()
+            ?: classLoader.getResource(classResourceName)?.openStream()
+            ?: throw RuntimeException("Could not get resource of class $className")
+
+        return ClassReader(inputStream)
+    }
+
+    companion object {
+        private val ALREADY_MODIFIED = AlreadyModified::class.qualifiedName
+        private val DELEGATE_THIS = DelegateThis::class.qualifiedName
     }
 }
