@@ -6,7 +6,7 @@
 
     <name>${project.artifactId}</name>
     <groupId>mikhail.dyomin</groupId>
-    <artifactId>maven-example</artifactId>
+    <artifactId>by-computed</artifactId>
     <version>1.0.0</version>
 
     <properties>
