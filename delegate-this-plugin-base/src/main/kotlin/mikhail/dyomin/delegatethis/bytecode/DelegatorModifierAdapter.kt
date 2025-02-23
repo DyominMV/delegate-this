@@ -111,7 +111,7 @@ internal class DelegatorModifierAdapter(
                     visitVarInsn(Opcodes.ALOAD, 0)
                     visitFieldInsn(Opcodes.GETFIELD, internalName, name, descriptor)
                     visitTypeInsn(Opcodes.INSTANCEOF, DELEGATE)
-                    // if (false) skipMethodCall; else ...
+                    // if (false) goto skipMethodCall; else ...
                     visitJumpInsn(Opcodes.IFEQ, skipMethodCall)
                     // this.`delegate_name`.receiveDelegator(this)
                     visitVarInsn(Opcodes.ALOAD, 0)

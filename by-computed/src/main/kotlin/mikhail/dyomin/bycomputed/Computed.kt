@@ -4,8 +4,9 @@ import mikhail.dyomin.delegatethis.Delegate
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy.newProxyInstance
+import kotlin.reflect.KClass
 
-class DelegatingInvocationHandler<Delegator : Any, TargetInterface : Any>(
+private class DelegatingInvocationHandler<Delegator : Any, TargetInterface : Any>(
     private val getter: Delegator.() -> TargetInterface
 ) : InvocationHandler {
     private lateinit var delegator: Delegator
@@ -22,20 +23,22 @@ class DelegatingInvocationHandler<Delegator : Any, TargetInterface : Any>(
     }
 }
 
-class ComputedDelegate<DelegatedInterface : Any>(val delegatedInterface: Class<DelegatedInterface>) {
-    inline fun <reified Delegator : Any> of(noinline getter: Delegator.() -> DelegatedInterface): DelegatedInterface {
-        val loader = Delegator::class.java.classLoader
-        val interfaces = arrayOf(Delegate::class.java, delegatedInterface)
+fun <Delegator : Any, TargetInterface : Any> delegatingProxy(
+    loader: ClassLoader,
+    targetInterface: KClass<TargetInterface>,
+    getter: Delegator.() -> TargetInterface
+): TargetInterface {
+    require(targetInterface.java.isInterface) { "targetInterface is required to be interface" }
+    require(!targetInterface.java.isSealed) { "targetInterface is required to be non-sealed" }
 
-        @Suppress("UNCHECKED_CAST")
-        return newProxyInstance(loader, interfaces, DelegatingInvocationHandler(getter)) as DelegatedInterface
-    }
+    val interfaces = arrayOf(Delegate::class.java, targetInterface.java)
+    @Suppress("UNCHECKED_CAST")
+    return newProxyInstance(loader, interfaces, DelegatingInvocationHandler(getter)) as TargetInterface
 }
 
-inline fun <reified DelegatedInterface : Any> computed(): ComputedDelegate<DelegatedInterface> {
-    val delegatedInterface = DelegatedInterface::class.java
-    if (!delegatedInterface.isInterface || delegatedInterface.isSealed) {
-        throw IllegalArgumentException("$delegatedInterface should be non-sealed interface")
-    }
-    return ComputedDelegate(delegatedInterface)
+class ComputedDelegate<DelegatedInterface : Any>(val delegatedInterface: KClass<DelegatedInterface>) {
+    inline fun <reified Delegator : Any> to(noinline getter: Delegator.() -> DelegatedInterface) =
+        delegatingProxy(Delegator::class.java.classLoader, delegatedInterface, getter)
 }
+
+inline fun <reified DelegatedInterface : Any> delegating() = ComputedDelegate(DelegatedInterface::class)
