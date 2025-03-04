@@ -45,7 +45,7 @@ open class NullableProperty<Delegator : Any, Property>(
     delegatorType: KClass<Delegator>,
     property: KProperty1<Delegator, Property?>
 ) : EqualsHashcodeAndToString, SinglePropertyBase<Delegator, Property?>(delegatorType, property) {
-    private fun id() = System.identityHashCode(delegator)
+    private val id = System.identityHashCode(delegator)
 
     final override fun equals(other: Any?) =
         if (getFromThis() == null) {
@@ -54,9 +54,9 @@ open class NullableProperty<Delegator : Any, Property>(
             getFromThis() == getFromOther(other)
         }
 
-    final override fun hashCode() = getFromThis()?.hashCode() ?: id()
+    final override fun hashCode() = getFromThis()?.hashCode() ?: id
 
-    override fun toString() = "${delegatorType.simpleName}@${id()}(${property.name}=${getFromThis()})"
+    override fun toString() = "${delegatorType.simpleName}@$id(${property.name}=${getFromThis()})"
 
     companion object {
         inline fun <reified T : Any, P : Any> nullableProperty(property: KProperty1<T, P?>) =

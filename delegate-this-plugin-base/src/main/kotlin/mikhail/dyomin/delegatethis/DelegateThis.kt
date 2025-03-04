@@ -28,7 +28,7 @@ class DelegateThis(
     }.toMap()
 
     private val delegates = mutableMapOf(Delegate::class.qualifiedName!! to true)
-    private val nonDelegateRegex = "^(java|kotlin)(x?)\\.".toRegex()
+    private val nonDelegateRegex = "^(java|kotlin)(x?)\\..*".toRegex()
 
     private val metadataCache = compiledClassesByNames.mapValues {
         ClassReader(it.value).getMetadata()
@@ -58,9 +58,10 @@ class DelegateThis(
 
     fun execute() = compiledClassesByNames.forEach { (className, path) ->
         val metadata = getMetadata(className)
-        if (!metadata.annotationQualifiedNames.contains(ALREADY_MODIFIED)) {
+        val delegateFields = metadata.fields.getDelegatesOnly()
+        if (!metadata.annotationQualifiedNames.contains(ALREADY_MODIFIED) && delegateFields.isNotEmpty()) {
             ClassReader(path)
-                .addDelegatesInitialization(metadata.fields.getDelegatesOnly())
+                .addDelegatesInitialization(delegateFields)
                 .let { path.writeBytes(it) }
         }
     }
