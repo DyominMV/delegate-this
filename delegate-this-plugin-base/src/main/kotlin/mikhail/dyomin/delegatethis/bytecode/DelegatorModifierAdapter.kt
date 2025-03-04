@@ -13,43 +13,24 @@ private data class ConstructorData(
     val exceptions: Array<out String>?,
 )
 
-private data class FieldData(
-    val name: String,
-    val descriptor: String
-)
-
-internal class DelegatorModifierAdapter(
-    delegateVisitor: ClassVisitor
+private class DelegatorModifierAdapter(
+    delegateVisitor: ClassVisitor,
+    private val fieldsToProvideDelegatorTo: List<SimplifiedFieldData>
 ) : ClassVisitor(Opcodes.ASM9, delegateVisitor) {
     private lateinit var internalName: String
     private val constructors = mutableListOf<ConstructorData>()
-    private val fields = mutableListOf<FieldData>()
 
     override fun visit(
         version: Int,
         access: Int,
-        name: String?,
+        name: String,
         signature: String?,
         superName: String?,
         interfaces: Array<out String>?
     ) {
         val newVersion = max(Opcodes.V1_5, version)
-        internalName = name!!
+        internalName = name
         super.visit(newVersion, access, name, signature, superName, interfaces)
-    }
-
-    // collect all object fields of the class
-    override fun visitField(
-        access: Int,
-        name: String,
-        descriptor: String,
-        signature: String?,
-        value: Any?
-    ): FieldVisitor {
-        if ((Type.getType(descriptor).sort == Type.OBJECT) && (access and Opcodes.ACC_STATIC == 0)) {
-            fields.add(FieldData(name, descriptor))
-        }
-        return super.visitField(access, name, descriptor, signature, value)
     }
 
     // mark all constructors, make marked constructors private
@@ -105,17 +86,11 @@ internal class DelegatorModifierAdapter(
         super.visitMethod(Opcodes.ACC_PRIVATE, DELEGATE_THIS, DELEGATE_THIS_DESCRIPTOR, null, emptyArray())
             .apply {
                 visitCode()
-                fields.forEach { (name, descriptor) ->
-                    val skipMethodCall = Label()
-                    // this.`delegate_name` instanceof Delegate
+                fieldsToProvideDelegatorTo.forEach { field ->
+                    // this.`delegate_name` ...
                     visitVarInsn(Opcodes.ALOAD, 0)
-                    visitFieldInsn(Opcodes.GETFIELD, internalName, name, descriptor)
-                    visitTypeInsn(Opcodes.INSTANCEOF, DELEGATE)
-                    // if (false) goto skipMethodCall; else ...
-                    visitJumpInsn(Opcodes.IFEQ, skipMethodCall)
-                    // this.`delegate_name`.receiveDelegator(this)
-                    visitVarInsn(Opcodes.ALOAD, 0)
-                    visitFieldInsn(Opcodes.GETFIELD, internalName, name, descriptor)
+                    visitFieldInsn(Opcodes.GETFIELD, internalName, field.name, field.type.descriptor)
+                    // ... .receiveDelegator(this)
                     visitVarInsn(Opcodes.ALOAD, 0)
                     visitMethodInsn(
                         Opcodes.INVOKEINTERFACE,
@@ -124,8 +99,6 @@ internal class DelegatorModifierAdapter(
                         "(L${Any::class.internalName};)V",
                         true
                     )
-                    visitLabel(skipMethodCall)
-                    visitFrame(Opcodes.F_SAME, 0, null, 0, null)
                 }
                 visitInsn(Opcodes.RETURN)
                 visitMaxs(0, 0) // replaced by class writer
@@ -191,3 +164,8 @@ internal class DelegatorModifierAdapter(
         private const val DELEGATE_THIS_DESCRIPTOR = "()V"
     }
 }
+
+fun ClassReader.addDelegatesInitialization(delegateFields: List<SimplifiedFieldData>): ByteArray =
+    ClassWriter(this, ClassWriter.COMPUTE_MAXS)
+        .also { this.accept(DelegatorModifierAdapter(it, delegateFields), 0) }
+        .toByteArray()

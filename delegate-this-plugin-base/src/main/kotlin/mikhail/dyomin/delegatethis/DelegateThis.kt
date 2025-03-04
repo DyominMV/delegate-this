@@ -1,23 +1,20 @@
 package mikhail.dyomin.delegatethis
 
-import mikhail.dyomin.delegatethis.bytecode.getAnnotations
-import mikhail.dyomin.delegatethis.bytecode.getModifiedBytes
+import mikhail.dyomin.delegatethis.bytecode.SimplifiedFieldData
+import mikhail.dyomin.delegatethis.bytecode.getMetadata
+import mikhail.dyomin.delegatethis.bytecode.addDelegatesInitialization
 import org.objectweb.asm.ClassReader
 import java.io.File
-import java.io.InputStream
 import java.nio.file.Path
-import kotlin.io.path.exists
+import kotlin.io.path.absolute
 import kotlin.io.path.inputStream
-import kotlin.io.path.isRegularFile
 import kotlin.io.path.writeBytes
 
 class DelegateThis(
-    private val classesRoots: List<Path>
+    classesRoots: List<Path>
 ) {
-    private val classLoader = this::class.java.classLoader
-
-    private val classNamesByPaths = classesRoots.flatMap { root ->
-        root.toFile().walkTopDown()
+    private val compiledClassesByNames = classesRoots.flatMap { root ->
+        root.absolute().toFile().walkTopDown()
             .filter { it.isFile && it.extension == "class" }
             .map { it.toPath() }
             .map { path ->
@@ -26,41 +23,49 @@ class DelegateThis(
                     .replace("\\.class\$".toRegex(), "")
                     .replace(File.separator, ".")
 
-                object {
-                    val className = className
-                    val classFilePath = path
-                }
+                className to path
             }
-    }.associate { it.classFilePath to it.className }
+    }.toMap()
 
-    fun execute() = classNamesByPaths.forEach { (classFilePath, className) ->
-        val classReader = getClassReader(className)
-        val annotations = classReader.getAnnotations()
-        if (!annotations.contains(ALREADY_MODIFIED) && annotations.contains(DELEGATE_THIS)) {
-            classFilePath.writeBytes(classReader.getModifiedBytes())
-        }
+    private val delegates = mutableMapOf(Delegate::class.qualifiedName!! to true)
+    private val nonDelegateRegex = "^(java|kotlin)(x?)\\.".toRegex()
+
+    private val metadataCache = compiledClassesByNames.mapValues {
+        ClassReader(it.value).getMetadata()
     }
 
-    private fun getClassReader(className: String): ClassReader {
-        val classResourceName = className
-            .replace("\\.".toRegex(), "/")
-            .replace("<.+$".toRegex(), "")
-            .plus(".class")
+    private fun ClassReader(path: Path) = ClassReader(path.inputStream())
 
-        val inputStream: InputStream = classResourceName
-            .replace("/", File.separator)
-            .let { classesRoots.map { root -> root.resolve(it) } }
-            .find { it.exists() && it.isRegularFile() }
-            ?.inputStream()
-            ?: ClassLoader.getSystemResource(classResourceName)?.openStream()
-            ?: classLoader.getResource(classResourceName)?.openStream()
-            ?: throw RuntimeException("Could not get resource of class $className")
+    private fun isDelegate(qualifiedName: String): Boolean {
+        if (nonDelegateRegex.matches(qualifiedName)) {
+            return false
+        } else if (delegates.containsKey(qualifiedName)) {
+            return delegates[qualifiedName]!!
+        }
 
-        return ClassReader(inputStream)
+        val result = getMetadata(qualifiedName)
+            .parentsQualifiedNames
+            .any { isDelegate(it) }
+
+        delegates[qualifiedName] = result
+        return result
+    }
+
+    internal fun getMetadata(qualifiedName: String) =
+        metadataCache[qualifiedName] ?: ClassReader(qualifiedName).getMetadata()
+
+    internal fun List<SimplifiedFieldData>.getDelegatesOnly() = filter { isDelegate(it.type.className) }
+
+    fun execute() = compiledClassesByNames.forEach { (className, path) ->
+        val metadata = getMetadata(className)
+        if (!metadata.annotationQualifiedNames.contains(ALREADY_MODIFIED)) {
+            ClassReader(path)
+                .addDelegatesInitialization(metadata.fields.getDelegatesOnly())
+                .let { path.writeBytes(it) }
+        }
     }
 
     companion object {
         private val ALREADY_MODIFIED = AlreadyModified::class.qualifiedName
-        private val DELEGATE_THIS = DelegateThis::class.qualifiedName
     }
 }

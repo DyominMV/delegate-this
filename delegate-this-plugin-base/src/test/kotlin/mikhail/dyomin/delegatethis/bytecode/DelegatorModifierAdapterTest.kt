@@ -1,6 +1,7 @@
 package mikhail.dyomin.delegatethis.bytecode
 
 import mikhail.dyomin.delegatethis.AlreadyModified
+import mikhail.dyomin.delegatethis.DelegateThis
 import mikhail.dyomin.delegatethis.samples.NameExtractorDelegate
 import mikhail.dyomin.delegatethis.samples.SampleInterface
 import mikhail.dyomin.delegatethis.samples.loadClass
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.objectweb.asm.ClassReader
+import java.io.File
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Modifier
 import kotlin.test.assertNotNull
@@ -42,7 +44,9 @@ class DelegatorModifierAdapterTest {
             .newInstance("dogs")
 
         @Suppress("UNCHECKED_CAST")
-        (instance as Comparable<String>).compareTo("other")
+        assertDoesNotThrow {
+            (instance as Comparable<String>).compareTo("other")
+        }
     }
 
     @Test
@@ -83,10 +87,14 @@ class DelegatorModifierAdapterTest {
         @BeforeAll
         @JvmStatic
         fun `modify and load all sample classes`() {
+            val resourcesRoot = File(Companion::class.java.getResource("")!!.file).toPath()
+            val delegateThis = DelegateThis(listOf(resourcesRoot))
 
             sampleClassNames.forEach { className ->
                 val reader = ClassReader(className)
-                loadClass(reader.getModifiedBytes())
+                loadClass(delegateThis.run {
+                    reader.addDelegatesInitialization(getMetadata(className).fields.getDelegatesOnly())
+                })
             }
         }
     }
