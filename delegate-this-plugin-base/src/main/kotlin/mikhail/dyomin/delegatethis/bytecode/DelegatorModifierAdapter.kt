@@ -108,17 +108,16 @@ private class DelegatorModifierAdapter(
     private fun restoreNonMarkedConstructor(constructor: ConstructorData) {
         val (access, descriptor, signature, exceptions) = constructor
         val markedDescriptor = addMarkerForDescriptor(descriptor)
-        val className = internalName
         super.visitMethod(access, "<init>", descriptor, signature, exceptions).apply {
             visitCode()
             // call the real constructor
             visitVarInsn(Opcodes.ALOAD, 0)
             moveConstructorParametersToStack(descriptor)
             visitInsn(Opcodes.ACONST_NULL)
-            visitMethodInsn(Opcodes.INVOKESPECIAL, className, "<init>", markedDescriptor, false)
+            visitMethodInsn(Opcodes.INVOKESPECIAL, internalName, "<init>", markedDescriptor, false)
             // supply `this` to delegates
             visitVarInsn(Opcodes.ALOAD, 0)
-            visitMethodInsn(Opcodes.INVOKESPECIAL, className, DELEGATE_THIS, DELEGATE_THIS_DESCRIPTOR, false)
+            visitMethodInsn(Opcodes.INVOKESPECIAL, internalName, DELEGATE_THIS, DELEGATE_THIS_DESCRIPTOR, false)
             // return
             visitInsn(Opcodes.RETURN)
             visitMaxs(0, 0) // replaced by writer

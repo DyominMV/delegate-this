@@ -3,12 +3,12 @@ package mikhail.dyomin.delegatethis.bytecode
 import org.objectweb.asm.*
 import org.objectweb.asm.ClassReader.*
 
-class SimplifiedFieldData(
+data class SimplifiedFieldData(
     val name: String,
     val type: Type,
 )
 
-class SimplifiedClassData(
+data class SimplifiedClassData(
     val annotationQualifiedNames: List<String>,
     val fields: List<SimplifiedFieldData>,
     val parentsQualifiedNames: List<String>,

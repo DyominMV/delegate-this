@@ -5,10 +5,8 @@ import mikhail.dyomin.delegatethis.DelegateThis
 import mikhail.dyomin.delegatethis.samples.NameExtractorDelegate
 import mikhail.dyomin.delegatethis.samples.SampleInterface
 import mikhail.dyomin.delegatethis.samples.loadClass
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.objectweb.asm.ClassReader
@@ -18,7 +16,22 @@ import java.lang.reflect.Modifier
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@TestInstance(PER_CLASS)
 class DelegatorModifierAdapterTest {
+
+    @BeforeAll
+    fun `modify and load all sample classes`() {
+        val resourcesRoot = File(javaClass.getResource("")!!.file).toPath()
+        val delegateThis = DelegateThis(listOf(resourcesRoot))
+
+        sampleClassNames.forEach { className ->
+            val reader = ClassReader(className)
+            loadClass(delegateThis.run {
+                reader.addDelegatesInitialization(getMetadata(className).fields.getDelegatesOnly())
+            })
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("classes with delegate")
     fun `DelegatorModifierAdapter should add method called 'delegateThis'`(modifiedClass: Class<*>): Unit =
@@ -74,28 +87,12 @@ class DelegatorModifierAdapterTest {
         assertTrue { modifiedClass.isAnnotationPresent(AlreadyModified::class.java) }
     }
 
-    companion object {
-        private val sampleClassNames = listOf(
-            "mikhail.dyomin.delegatethis.samples.ClassWithDeeperDelegate",
-            "mikhail.dyomin.delegatethis.samples.ClassWithSimpleDelegate",
-            "mikhail.dyomin.delegatethis.samples.ClassWithTiedDelegates",
-        )
+    private val sampleClassNames = listOf(
+        "mikhail.dyomin.delegatethis.samples.ClassWithDeeperDelegate",
+        "mikhail.dyomin.delegatethis.samples.ClassWithSimpleDelegate",
+        "mikhail.dyomin.delegatethis.samples.ClassWithTiedDelegates",
+    )
 
-        @JvmStatic
-        fun `classes with delegate`() = sampleClassNames.map { Class.forName(it) }
+    fun `classes with delegate`() = sampleClassNames.map { Class.forName(it) }
 
-        @BeforeAll
-        @JvmStatic
-        fun `modify and load all sample classes`() {
-            val resourcesRoot = File(Companion::class.java.getResource("")!!.file).toPath()
-            val delegateThis = DelegateThis(listOf(resourcesRoot))
-
-            sampleClassNames.forEach { className ->
-                val reader = ClassReader(className)
-                loadClass(delegateThis.run {
-                    reader.addDelegatesInitialization(getMetadata(className).fields.getDelegatesOnly())
-                })
-            }
-        }
-    }
 }
