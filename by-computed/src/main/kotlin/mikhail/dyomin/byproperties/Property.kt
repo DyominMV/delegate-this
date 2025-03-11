@@ -19,10 +19,9 @@ abstract class SinglePropertyBase<Delegator : Any, Property>(
     protected fun getFromThis(): Property = property.get(delegator)
 
     @Suppress("UNCHECKED_CAST")
-    protected fun getFromOther(other: Any?) = other
-        ?.takeIf { delegatorType.isInstance(it) }
-        ?.let { it as Delegator }
-        ?.let { property.get(it) }
+    protected fun getFromOther(other: Any?) =
+        property.takeIf { delegatorType.isInstance(it) }
+            ?.get(other as Delegator)
 }
 
 open class SingleProperty<Delegator : Any, Property : Any>(
@@ -45,14 +44,9 @@ open class NullableProperty<Delegator : Any, Property>(
     delegatorType: KClass<Delegator>,
     property: KProperty1<Delegator, Property?>
 ) : EqualsHashcodeAndToString, SinglePropertyBase<Delegator, Property?>(delegatorType, property) {
-    private val id = System.identityHashCode(delegator)
+    private val id get() = System.identityHashCode(delegator)
 
-    final override fun equals(other: Any?) =
-        if (getFromThis() == null) {
-            this === other
-        } else {
-            getFromThis() == getFromOther(other)
-        }
+    final override fun equals(other: Any?) = getFromThis()?.equals(getFromOther(other)) ?: (this === other)
 
     final override fun hashCode() = getFromThis()?.hashCode() ?: id
 

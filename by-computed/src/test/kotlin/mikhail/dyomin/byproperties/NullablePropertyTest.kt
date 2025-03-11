@@ -6,7 +6,7 @@ import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class ByPropertiesTest {
+class NullablePropertyTest {
     @Test
     fun `equals and toString by nullable property should work correctly`() {
         class Sample(
