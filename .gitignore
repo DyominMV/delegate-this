@@ -1,10 +1,18 @@
+### Maven ###
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Gradle ###
+gradlew.bat
+gradlew
+**/gradle/wrapper/
+.gradle
+**/build/
+
 ### IntelliJ IDEA ###
-.idea/**
+.idea
 *.iws
 *.iml
 *.ipr
