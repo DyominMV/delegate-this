@@ -2,6 +2,7 @@ package mikhail.dyomin.delegatethis.bytecode
 
 import mikhail.dyomin.delegatethis.AlreadyModified
 import mikhail.dyomin.delegatethis.Delegate
+import mikhail.dyomin.delegatethis.NonDelegatingConstructorMarker
 import org.objectweb.asm.*
 import kotlin.math.max
 import kotlin.reflect.KClass
@@ -126,32 +127,29 @@ private class DelegatorModifierAdapter(
     }
 
     private fun addMarkerForDescriptor(descriptor: String) =
-        descriptor.substring(0, descriptor.lastIndex - 1) + "L${Nothing::class.internalName};)V"
+        descriptor.substring(0, descriptor.lastIndex - 1) + "L${NonDelegatingConstructorMarker::class.internalName};)V"
 
     private fun addMarkerForSignature(signature: String) =
-        signature.replace(")", "L${Nothing::class.internalName};)")
+        signature.replace(")", "L${NonDelegatingConstructorMarker::class.internalName};)")
 
-    private fun MethodVisitor.moveConstructorParametersToStack(descriptor: String) {
-        var currentDescriptor = descriptor.substring(1, descriptor.lastIndex - 1)
-        var varIndex = 1
-        while (currentDescriptor != "") {
-            when (currentDescriptor[0]) {
-                'B', 'C', 'I', 'S', 'Z' -> visitVarInsn(Opcodes.ILOAD, varIndex)
-                'J' -> visitVarInsn(Opcodes.LLOAD, varIndex)
-                'F' -> visitVarInsn(Opcodes.FLOAD, varIndex)
-                'D' -> visitVarInsn(Opcodes.DLOAD, varIndex)
-                else -> visitVarInsn(Opcodes.ALOAD, varIndex)
+    private fun MethodVisitor.moveConstructorParametersToStack(descriptor: String) =
+        parseConstructorParameters(descriptor).map {
+            when (it) {
+                'B', 'C', 'I', 'S', 'Z' -> Opcodes.ILOAD
+                'J' -> Opcodes.LLOAD
+                'F' -> Opcodes.FLOAD
+                'D' -> Opcodes.DLOAD
+                else -> Opcodes.ALOAD
             }
-            varIndex += 1
-            currentDescriptor = currentDescriptor.replace(typeRegex, "")
-        }
-    }
+        }.forEachIndexed { index, instruction -> visitVarInsn(instruction, index + 1) }
+
+    private fun parseConstructorParameters(descriptor: String) = descriptor.substring(1..descriptor.length - 2)
+        .let { typePattern.matcher(it).results() }
+        .map { it.group()[0] }
+        .toList()
 
     companion object {
-        private val typeRegex = run {
-            val objectTypeRegex = "L[^;]+;"
-            "^(\\[)*(B|C|D|F|I|J|S|Z|($objectTypeRegex))".toRegex()
-        }
+        private val typePattern = "(\\[*)B|C|D|F|I|J|S|Z|(L[^;]+;)".toPattern()
 
         private val KClass<*>.internalName get() = Type.getType(this.java).internalName
 

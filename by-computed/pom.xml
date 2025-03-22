@@ -59,8 +59,14 @@
                 <version>${project.version}</version>
                 <executions>
                     <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals><goal>transform-delegators</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
                         <phase>test-compile</phase>
-                        <goals><goal>transform-delegators-test</goal></goals>
+                        <goals><goal>transform-test-delegators</goal></goals>
                     </execution>
                 </executions>
             </plugin>

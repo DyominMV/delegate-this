@@ -20,8 +20,8 @@ abstract class SinglePropertyBase<Delegator : Any, Property>(
 
     @Suppress("UNCHECKED_CAST")
     protected fun getFromOther(other: Any?) =
-        property.takeIf { delegatorType.isInstance(it) }
-            ?.get(other as Delegator)
+        other.takeIf { delegatorType.isInstance(it) }
+            ?.let { property.get(it as Delegator) }
 }
 
 open class SingleProperty<Delegator : Any, Property : Any>(

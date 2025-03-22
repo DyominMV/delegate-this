@@ -29,10 +29,10 @@ class DelegateThisMojo : DelegateThisMojoBase() {
 }
 
 /**
- * @goal transform-delegators-test
+ * @goal transform-test-delegators
  * @phase process-test-classes
  */
-@Mojo(name = "transform-delegators-test", requiresDependencyCollection = ResolutionScope.TEST)
+@Mojo(name = "transform-test-delegators", requiresDependencyCollection = ResolutionScope.TEST)
 class DelegateThisTestsMojo : DelegateThisMojoBase() {
     /**
      * directories with `*.class` files produced by compiler (default value:

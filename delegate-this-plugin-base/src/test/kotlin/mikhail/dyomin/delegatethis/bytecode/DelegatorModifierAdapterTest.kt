@@ -1,6 +1,7 @@
 package mikhail.dyomin.delegatethis.bytecode
 
 import mikhail.dyomin.delegatethis.AlreadyModified
+import mikhail.dyomin.delegatethis.NonDelegatingConstructorMarker
 import mikhail.dyomin.delegatethis.DelegateThis
 import mikhail.dyomin.delegatethis.samples.NameExtractorDelegate
 import mikhail.dyomin.delegatethis.samples.SampleInterface
@@ -41,10 +42,10 @@ class DelegatorModifierAdapterTest {
     @MethodSource("classes with delegate")
     fun `DelegatorModifierAdapter should create constructors with Void param`(modifiedClass: Class<*>): Unit =
         modifiedClass.declaredConstructors.filter {
-            it.parameterTypes.lastOrNull() != Nothing::class.java
+            it.parameterTypes.lastOrNull() != NonDelegatingConstructorMarker::class.java
         }.forEach {
             val ctor = assertDoesNotThrow {
-                modifiedClass.getDeclaredConstructor(*it.parameterTypes, Nothing::class.java)
+                modifiedClass.getDeclaredConstructor(*it.parameterTypes, NonDelegatingConstructorMarker::class.java)
             }
 
             assertTrue { ctor.modifiers and Modifier.PRIVATE == Modifier.PRIVATE }
