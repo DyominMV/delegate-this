@@ -15,7 +15,7 @@ group = "mikhail.dyomin"
 version = "1.0.0"
 
 dependencies {
-    implementation("mikhail.dyomin", "delegate-this-plugin-base", version.toString())
+    api("mikhail.dyomin", "delegate-this-plugin-base", version.toString())
     implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "2.1.0")
 }
 

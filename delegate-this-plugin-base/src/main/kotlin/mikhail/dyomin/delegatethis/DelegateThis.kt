@@ -1,19 +1,21 @@
 package mikhail.dyomin.delegatethis
 
 import mikhail.dyomin.delegatethis.bytecode.SimplifiedFieldData
-import mikhail.dyomin.delegatethis.bytecode.getMetadata
 import mikhail.dyomin.delegatethis.bytecode.addDelegatesInitialization
+import mikhail.dyomin.delegatethis.bytecode.getMetadata
 import org.objectweb.asm.ClassReader
 import java.io.File
+import java.lang.ClassLoader.getSystemClassLoader
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.inputStream
 import kotlin.io.path.writeBytes
 
 class DelegateThis(
-    classesRoots: List<Path>
+    modifiableClassesRoots: List<Path>,
+    private val unmodifiableClassesLoader: ClassLoader = getSystemClassLoader(),
 ) {
-    private val compiledClassesByNames = classesRoots.flatMap { root ->
+    private val compiledClassesByNames = modifiableClassesRoots.flatMap { root ->
         root.absolute().toFile().walkTopDown()
             .filter { it.isFile && it.extension == "class" }
             .map { it.toPath() }
@@ -27,14 +29,17 @@ class DelegateThis(
             }
     }.toMap()
 
+    private fun readModifiableClass(path: Path) = ClassReader(path.inputStream())
+    private fun readUnmodifiableClass(qualifiedName: String) = ClassReader(
+        unmodifiableClassesLoader.getResourceAsStream(qualifiedName.replace('.', '/') + ".class")
+    )
+
     private val delegates = mutableMapOf(Delegate::class.qualifiedName!! to true)
     private val nonDelegateRegex = "^(java|kotlin)(x?)\\..*".toRegex()
 
     private val metadataCache = compiledClassesByNames.mapValues {
-        ClassReader(it.value).getMetadata()
+        readModifiableClass(it.value).getMetadata()
     }
-
-    private fun ClassReader(path: Path) = ClassReader(path.inputStream())
 
     private fun isDelegate(qualifiedName: String): Boolean {
         if (nonDelegateRegex.matches(qualifiedName)) {
@@ -51,8 +56,11 @@ class DelegateThis(
         return result
     }
 
-    internal fun getMetadata(qualifiedName: String) =
-        metadataCache[qualifiedName] ?: ClassReader(qualifiedName).getMetadata()
+    internal fun getMetadata(qualifiedName: String) = try {
+        metadataCache[qualifiedName] ?: readUnmodifiableClass(qualifiedName).getMetadata()
+    } catch (exception: Throwable) {
+        throw IllegalArgumentException("Cannot find class $qualifiedName", exception)
+    }
 
     internal fun List<SimplifiedFieldData>.getDelegatesOnly() = filter { isDelegate(it.type.className) }
 
@@ -60,7 +68,7 @@ class DelegateThis(
         val metadata = getMetadata(className)
         val delegateFields = metadata.fields.getDelegatesOnly()
         if (!metadata.annotationQualifiedNames.contains(ALREADY_MODIFIED) && delegateFields.isNotEmpty()) {
-            ClassReader(path)
+            readModifiableClass(path)
                 .addDelegatesInitialization(delegateFields)
                 .let { path.writeBytes(it) }
         }
