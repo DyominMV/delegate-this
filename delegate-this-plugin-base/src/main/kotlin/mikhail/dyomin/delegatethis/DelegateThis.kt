@@ -29,10 +29,11 @@ class DelegateThis(
             }
     }.toMap()
 
-    private fun readModifiableClass(path: Path) = ClassReader(path.inputStream())
-    private fun readUnmodifiableClass(qualifiedName: String) = ClassReader(
+    private fun readModifiableClass(path: Path) = path.inputStream().use { ClassReader(it) }
+    private fun readUnmodifiableClass(qualifiedName: String) =
         unmodifiableClassesLoader.getResourceAsStream(qualifiedName.replace('.', '/') + ".class")
-    )
+            .use { ClassReader(it) }
+
 
     private val delegates = mutableMapOf(Delegate::class.qualifiedName!! to true)
     private val nonDelegateRegex = "^(java|kotlin)(x?)\\..*".toRegex()
