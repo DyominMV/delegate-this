@@ -29,9 +29,9 @@ open class SingleProperty<Delegator : Any, Property : Any>(
     property: KProperty1<Delegator, Property>
 ) : EqualsHashcodeAndToString, SinglePropertyBase<Delegator, Property>(delegatorType, property) {
 
-    final override fun equals(other: Any?) = getFromOther(other)?.equals(getFromThis()) ?: false
+    override fun equals(other: Any?) = getFromOther(other)?.equals(getFromThis()) ?: false
 
-    final override fun hashCode() = getFromThis().hashCode()
+    override fun hashCode() = getFromThis().hashCode()
 
     override fun toString() = "${delegatorType.simpleName}(${property.name}=${getFromThis()})"
 
@@ -46,9 +46,9 @@ open class NullableProperty<Delegator : Any, Property>(
 ) : EqualsHashcodeAndToString, SinglePropertyBase<Delegator, Property?>(delegatorType, property) {
     private val id get() = System.identityHashCode(delegator)
 
-    final override fun equals(other: Any?) = getFromThis()?.equals(getFromOther(other)) ?: (this === other)
+    override fun equals(other: Any?) = getFromThis()?.equals(getFromOther(other)) ?: (this === other)
 
-    final override fun hashCode() = getFromThis()?.hashCode() ?: id
+    override fun hashCode() = getFromThis()?.hashCode() ?: id
 
     override fun toString() = "${delegatorType.simpleName}@$id(${property.name}=${getFromThis()})"
 
@@ -58,7 +58,7 @@ open class NullableProperty<Delegator : Any, Property>(
     }
 }
 
-class ComparedProperty<Delegator : Comparable<Delegator>, Property : Comparable<Property>>(
+open class ComparedProperty<Delegator : Comparable<Delegator>, Property : Comparable<Property>>(
     delegatorType: KClass<Delegator>,
     property: KProperty1<Delegator, Property>
 ) : EqualsHashcodeToStringAndComparable<Delegator>, SingleProperty<Delegator, Property>(delegatorType, property) {

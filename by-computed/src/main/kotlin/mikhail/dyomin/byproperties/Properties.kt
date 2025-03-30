@@ -4,9 +4,9 @@ import mikhail.dyomin.delegatethis.Delegate
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 
-class Properties<Delegator : Any>(
-    private val delegatorType: KClass<Delegator>,
-    private val properties: List<KProperty1<Delegator, Any>>
+open class Properties<Delegator : Any>(
+    protected val delegatorType: KClass<Delegator>,
+    protected val properties: List<KProperty1<Delegator, Any>>
 ) : Delegate, EqualsHashcodeAndToString {
     private lateinit var delegator: Delegator
 
@@ -25,10 +25,10 @@ class Properties<Delegator : Any>(
         ?.let { this.delegator = it as Delegator }
         ?: throw IllegalArgumentException("delegator should be of type $delegatorType")
 
-    private fun getFromThis(): Map<String, Any> = properties.associate { it.name to it.get(delegator) }
+    protected fun getFromThis(): Map<String, Any> = properties.associate { it.name to it.get(delegator) }
 
     @Suppress("UNCHECKED_CAST")
-    private fun getFromOther(other: Any?): Map<String, Any>? =
+    protected fun getFromOther(other: Any?): Map<String, Any>? =
         properties.takeIf { delegatorType.isInstance(other) }
             ?.associate { it.name to it.get(other as Delegator) }
 
