@@ -54,7 +54,7 @@
                 <version>3.13.0</version>
             </plugin>
             <plugin>
-                <groupId>mikhail.dyomin</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>delegate-this-maven-plugin</artifactId>
                 <version>${project.version}</version>
                 <executions>
