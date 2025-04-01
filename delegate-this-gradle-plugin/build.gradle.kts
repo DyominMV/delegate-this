@@ -11,19 +11,19 @@ buildscript {
     }
 }
 
-group = "mikhail.dyomin"
+group = "com.github.dyominmv"
 version = "1.0.0"
 
 dependencies {
-    api("mikhail.dyomin", "delegate-this-plugin-base", version.toString())
+    api("com.github.dyominmv", "delegate-this-plugin-base", version.toString())
     implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "2.1.0")
 }
 
 gradlePlugin {
     plugins {
         create("simplePlugin") {
-            id = "mikhail.dyomin.delegate-this-gradle-plugin"
-            implementationClass = "mikhail.dyomin.delegatethis.DelegateThisPlugin"
+            id = "com.github.dyominmv.delegate-this-gradle-plugin"
+            implementationClass = "com.github.dyominmv.delegatethis.DelegateThisPlugin"
         }
     }
 }
@@ -36,7 +36,7 @@ repositories {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            groupId = "mikhail.dyomin"
+            groupId = "com.github.dyominmv"
             artifactId = "delegate-this-gradle-plugin"
             version = rootProject.version.toString()
 

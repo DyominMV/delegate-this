@@ -30,7 +30,7 @@
    ```xml
    <plugins>
        <plugin>
-           <groupId>mikhail.dyomin</groupId>
+           <groupId>com.github.dyominmv</groupId>
            <artifactId>delegate-this-maven-plugin</artifactId>
            <version>${актуальная версия}</version>
            <executions>
@@ -51,7 +51,7 @@
 - градле:
    ```kts
    plugins {
-       id("mikhail.dyomin.delegate-this-gradle-plugin") version "актуальная версия"
+       id("com.github.dyominmv.delegate-this-gradle-plugin") version "актуальная версия"
    }
    ```
 
@@ -63,14 +63,14 @@
 - мавен:
    ```xml
    <dependency>
-       <groupId>mikhail.dyomin</groupId>
+       <groupId>com.github.dyominmv</groupId>
        <artifactId>delegate-this</artifactId>
        <version>${актуальная версия}</version>
    </dependency>
    ```
 - градле:
    ```kts
-       implementation("mikhail.dyomin", "delegate-this", "актуальная версия")
+       implementation("com.github.dyominmv", "delegate-this", "актуальная версия")
    ```
 
 ### 3. Получаем ссылку на делегатора внутри делегата
@@ -89,7 +89,7 @@ class Cat : Animal, Delegate {
         this.delegator = delegator
     }
 
-    override fun makeSound() = println("Meow, my  hashCode is ${delegator.hashCode()}")
+    override fun makeSound() = println("Meow, my hashCode is ${delegator.hashCode()}")
 }
 
 class AnimalDelegator: Animal by Cat()

@@ -1,7 +1,7 @@
-package mikhail.dyomin
+package com.github.dyominmv
 
-import mikhail.dyomin.byproperties.EqualsHashcodeAndToString
-import mikhail.dyomin.byproperties.Properties.Companion.properties
+import com.github.dyominmv.byproperties.EqualsHashcodeAndToString
+import com.github.dyominmv.byproperties.Properties.Companion.properties
 
 class SimpleSample(
     var name: String,
