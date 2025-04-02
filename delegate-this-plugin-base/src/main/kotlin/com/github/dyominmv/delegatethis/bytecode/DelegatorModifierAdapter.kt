@@ -149,7 +149,7 @@ private class DelegatorModifierAdapter(
         .toList()
 
     companion object {
-        private val typePattern = "(\\[*)B|C|D|F|I|J|S|Z|(L[^;]+;)".toPattern()
+        private val typePattern = "(\\[*)(B|C|D|F|I|J|S|Z|(L[^;]+;))".toPattern()
 
         private val KClass<*>.internalName get() = Type.getType(this.java).internalName
 
