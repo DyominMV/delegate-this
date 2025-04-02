@@ -162,6 +162,10 @@ private class DelegatorModifierAdapter(
     }
 }
 
+/**
+ * applies bytecode modification to the class accessed by [ClassReader].
+ * [delegateFields] can be obtained by calling [ClassReader.getMetadata]
+ */
 fun ClassReader.addDelegatesInitialization(delegateFields: List<SimplifiedFieldData>): ByteArray =
     ClassWriter(this, ClassWriter.COMPUTE_MAXS)
         .also { this.accept(DelegatorModifierAdapter(it, delegateFields), 0) }

@@ -23,6 +23,15 @@ private class DelegatingInvocationHandler<Delegator : Any, TargetInterface : Any
     }
 }
 
+/**
+ * Creates a delegate to getter. Calling method on delegate will evaluate getter and proxy execution to its result.
+ * @param Delegator class that uses the delegate
+ * @param TargetInterface interface to be delegated
+ * @param loader classLoader that is used to create proxy object, see [newProxyInstance]
+ * @param targetInterface [TargetInterface]
+ * @param getter function that is applied to delegator to get the actual delegate value
+ * @return proxy instance of [Delegate] and [TargetInterface]
+ */
 fun <Delegator : Any, TargetInterface : Any> delegatingProxy(
     loader: ClassLoader,
     targetInterface: KClass<TargetInterface>,
@@ -36,9 +45,22 @@ fun <Delegator : Any, TargetInterface : Any> delegatingProxy(
     return newProxyInstance(loader, interfaces, DelegatingInvocationHandler(getter)) as TargetInterface
 }
 
+/**
+ * DSL element used to create delegate. See [delegating], [to]
+ */
 class ComputedDelegate<DelegatedInterface : Any>(val delegatedInterface: KClass<DelegatedInterface>) {
+    /**
+     * Creates a delegate of the type of [Delegator] to specified [getter].
+     * @param Delegator class that uses created delegate
+     * @param getter function that is applied to delegator to get the actual delegate value
+     */
     inline fun <reified Delegator : Any> to(noinline getter: Delegator.() -> DelegatedInterface) =
         delegatingProxy(Delegator::class.java.classLoader, delegatedInterface, getter)
 }
 
+/**
+ * Allows to delegate specified interface methods to arbitrary getter.
+ * @param DelegatedInterface should be interface
+ * @return DSL element that allows to specify function, which result is used as a delegate
+ */
 inline fun <reified DelegatedInterface : Any> delegating() = ComputedDelegate(DelegatedInterface::class)

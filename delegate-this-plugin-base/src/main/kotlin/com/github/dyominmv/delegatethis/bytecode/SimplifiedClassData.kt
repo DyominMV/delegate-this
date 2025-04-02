@@ -8,6 +8,11 @@ data class SimplifiedFieldData(
     val type: Type,
 )
 
+/**
+ * @property annotationQualifiedNames names of annotations of the class
+ * @property fields non-static reference-type fields of the class
+ * @property parentsQualifiedNames names of direct interfaces and superclasses of the class
+ */
 data class SimplifiedClassData(
     val annotationQualifiedNames: List<String>,
     val fields: List<SimplifiedFieldData>,

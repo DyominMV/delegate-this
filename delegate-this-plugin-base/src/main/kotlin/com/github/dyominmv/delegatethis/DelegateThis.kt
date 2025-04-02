@@ -11,6 +11,12 @@ import kotlin.io.path.absolute
 import kotlin.io.path.inputStream
 import kotlin.io.path.writeBytes
 
+/**
+ * basic class to implement plugin for specified build tool.
+ *
+ * @param modifiableClassesRoots paths to classes to be modified, usually something like target/classes
+ * @param unmodifiableClassesLoader classLoader with access to all dependencies accessible from classes to be modified
+ */
 class DelegateThis(
     modifiableClassesRoots: List<Path>,
     private val unmodifiableClassesLoader: ClassLoader = getSystemClassLoader(),
@@ -65,6 +71,10 @@ class DelegateThis(
 
     internal fun List<SimplifiedFieldData>.getDelegatesOnly() = filter { isDelegate(it.type.className) }
 
+    /**
+     * executes bytecode modification in order to trigger [Delegate.receiveDelegator] on every interface delegate of an
+     * object after it is created
+     */
     fun execute() = compiledClassesByNames.forEach { (className, path) ->
         val metadata = getMetadata(className)
         val delegateFields = metadata.fields.getDelegatesOnly()
