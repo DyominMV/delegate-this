@@ -6,7 +6,7 @@ package com.github.dyominmv.delegatethis
 interface Delegate {
     /**
      * Passes delegator reference to the delegate. This method should be called only once during delegating object
-     * lifecycle. Normally is call is added to constructor bytecode by plugin.
+     * lifecycle. Normally its call is added to constructor bytecode by plugin.
      */
     fun receiveDelegator(delegator: Any)
 }
