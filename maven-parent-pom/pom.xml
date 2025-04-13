@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>${project.artifactId}</name>
-    <groupId>com.github.dyominmv</groupId>
+    <groupId>io.github.dyominmv</groupId>
     <artifactId>maven-parent-pom</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
@@ -95,9 +95,12 @@
                     <execution>
                         <id>compile</id>
                         <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
+                        <goals><goal>compile</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals><goal>test-compile</goal></goals>
                     </execution>
                 </executions>
             </plugin>

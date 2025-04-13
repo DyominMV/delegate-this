@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.dyominmv</groupId>
+        <groupId>io.github.dyominmv</groupId>
         <artifactId>maven-parent-pom</artifactId>
         <version>1.0.0</version>
         <relativePath>../maven-parent-pom/pom.xml</relativePath>

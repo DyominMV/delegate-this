@@ -30,7 +30,7 @@
    ```xml
    <plugins>
        <plugin>
-           <groupId>com.github.dyominmv</groupId>
+           <groupId>io.github.dyominmv</groupId>
            <artifactId>delegate-this-maven-plugin</artifactId>
            <version>${актуальная версия}</version>
            <executions>
@@ -51,7 +51,7 @@
 - градле:
    ```kts
    plugins {
-       id("com.github.dyominmv.delegate-this-gradle-plugin") version "актуальная версия"
+       id("io.github.dyominmv.delegate-this-gradle-plugin") version "актуальная версия"
    }
    ```
 
@@ -63,14 +63,14 @@
 - мавен:
    ```xml
    <dependency>
-       <groupId>com.github.dyominmv</groupId>
+       <groupId>io.github.dyominmv</groupId>
        <artifactId>delegate-this</artifactId>
        <version>${актуальная версия}</version>
    </dependency>
    ```
 - градле:
    ```kts
-       implementation("com.github.dyominmv", "delegate-this", "актуальная версия")
+       implementation("io.github.dyominmv", "delegate-this", "актуальная версия")
    ```
 
 ### 3. Получаем ссылку на делегатора внутри делегата

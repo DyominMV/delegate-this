@@ -1,7 +1,7 @@
-package com.github.dyominmv
+package io.github.dyominmv
 
-import com.github.dyominmv.byproperties.EqualsHashcodeAndToString
-import com.github.dyominmv.byproperties.Properties.Companion.properties
+import io.github.dyominmv.byproperties.EqualsHashcodeAndToString
+import io.github.dyominmv.byproperties.Properties.Companion.properties
 
 class SimpleSample(
     var name: String,

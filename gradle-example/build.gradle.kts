@@ -1,9 +1,9 @@
 plugins {
     kotlin("jvm") version "2.1.10"
-    id("com.github.dyominmv.delegate-this-gradle-plugin") version "1.0.0"
+    id("io.github.dyominmv.delegate-this-gradle-plugin") version "1.0.0"
 }
 
-group = "com.github.dyominmv"
+group = "io.github.dyominmv"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.dyominmv", "by-computed", "1.0.0")
+    implementation("io.github.dyominmv", "by-computed", "1.0.0")
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.8.1")
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.8.1")
