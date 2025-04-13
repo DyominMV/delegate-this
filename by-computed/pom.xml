@@ -13,6 +13,7 @@
 
     <name>${project.artifactId}</name>
     <artifactId>by-computed</artifactId>
+    <description>allows delegating methods of Any to variable properties (requires delegate-this plugin)</description>
     <packaging>jar</packaging>
 
     <build>
