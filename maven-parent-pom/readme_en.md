@@ -1,0 +1,3 @@
+# maven-parent
+
+Trying hard to reduce the amount of xml in this repository...
