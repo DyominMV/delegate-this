@@ -1,7 +1,7 @@
 plugins {
-    `java-gradle-plugin`
+    id("com.gradle.plugin-publish") version "1.3.1"
+    signing
     kotlin("jvm") version "2.1.0"
-    `maven-publish`
 }
 
 buildscript {
@@ -20,31 +20,28 @@ dependencies {
 }
 
 gradlePlugin {
+    website = "https://github.com/dyominmv/delegate-this"
+    vcsUrl = "https://github.com/dyominmv/delegate-this.git"
     plugins {
-        create("simplePlugin") {
+        create("gradletestPlugin") {
             id = "io.github.dyominmv.delegate-this-gradle-plugin"
             implementationClass = "io.github.dyominmv.delegatethis.DelegateThisPlugin"
+            displayName = "delegate-this"
+            description = "Gradle plugin to transform delegators in order to initialize instances of Delegate"
+            tags = listOf("kotlin", "delegate")
         }
     }
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 publishing {
+    repositories { mavenLocal { name = "local" } }
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("snapshot") {
             groupId = "io.github.dyominmv"
             artifactId = "delegate-this-gradle-plugin"
             version = rootProject.version.toString()
 
             from(components["kotlin"])
         }
-    }
-
-    repositories {
-        mavenLocal()
     }
 }
