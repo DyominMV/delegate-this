@@ -4,6 +4,11 @@ plugins {
     kotlin("jvm") version "2.1.0"
 }
 
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
 buildscript {
     repositories {
         mavenCentral()
@@ -23,7 +28,7 @@ gradlePlugin {
     website = "https://github.com/dyominmv/delegate-this"
     vcsUrl = "https://github.com/dyominmv/delegate-this.git"
     plugins {
-        create("gradletestPlugin") {
+        create("delegateThis") {
             id = "io.github.dyominmv.delegate-this-gradle-plugin"
             implementationClass = "io.github.dyominmv.delegatethis.DelegateThisPlugin"
             displayName = "delegate-this"
@@ -34,14 +39,7 @@ gradlePlugin {
 }
 
 publishing {
-    repositories { mavenLocal { name = "local" } }
-    publications {
-        create<MavenPublication>("snapshot") {
-            groupId = "io.github.dyominmv"
-            artifactId = "delegate-this-gradle-plugin"
-            version = rootProject.version.toString()
-
-            from(components["kotlin"])
-        }
-    }
+    repositories { mavenLocal() }
 }
+
+signing { useGpgCmd() }
