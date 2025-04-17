@@ -1,6 +1,6 @@
 # delegate-this
 
-Finally in Kotlin, an interface delegate can use a reference to the delegater!
+Finally in Kotlin, an interface delegate can use a reference to the delegator!
 
 > _you've been waiting for this all your life, I know_
 
