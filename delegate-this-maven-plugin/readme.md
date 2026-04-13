@@ -33,8 +33,8 @@ intellij IDE, so you have to click on the following checkbox in the settings:
    </plugin>
    ```
 2. By default, classes to be transformed are searched for in your projects build output directory, but it can be 
-overridden by setting the `buildOutputDirectories` property like following:
-
+overridden by setting `buildOutputDirectories` (for compile phase) and `buildTestOutputDirectories` 
+(for test-compile phase) like following: 
    ```xml
    <execution>
        <id>compile</id>
@@ -42,8 +42,21 @@ overridden by setting the `buildOutputDirectories` property like following:
        <goals><goal>transform-delegators</goal></goals>
        <configuration>
            <buildOutputDirectories>
-                
+                <directory>custom-compile-directory-1</directory>
+                <directory>custom-compile-directory-2</directory>
            </buildOutputDirectories>
+       </configuration>
+   </execution>
+   <execution>
+       <id>test-compile</id>
+       <phase>test-compile</phase>
+       <goals><goal>transform-test-delegators</goal></goals>
+       <configuration>
+           <buildTestOutputDirectories>
+                <directory>custom-compile-directory-1</directory>
+                <directory>custom-compile-directory-2</directory>
+                <directory>custom-test-compile-directory</directory>
+           </buildTestOutputDirectories>
        </configuration>
    </execution>
    ```

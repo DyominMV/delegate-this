@@ -38,7 +38,7 @@ class DelegateThisMojo : DelegateThisMojoBase() {
      * directories with `*.class` files produced by compiler (default value: `${project.build.outputDirectory}`)
      */
     @Parameter(readonly = false, defaultValue = "\${project.build.outputDirectory}")
-    fun setBuildOutputDirectories(dirs: List<String>) {
+    fun setBuildOutputDirectories(dirs: Array<String>) {
         this.directoriesWithClasses = dirs.map { Path.of(it).absolute() }
     }
 }
@@ -63,7 +63,7 @@ class DelegateThisTestsMojo : DelegateThisMojoBase() {
         readonly = false,
         defaultValue = "\${project.build.testOutputDirectory},\${project.build.outputDirectory}"
     )
-    fun setBuildTestOutputDirectories(dirs: List<String>) {
+    fun setBuildTestOutputDirectories(dirs: Array<String>) {
         this.directoriesWithClasses = dirs.map { Path.of(it).absolute() }
     }
 }
