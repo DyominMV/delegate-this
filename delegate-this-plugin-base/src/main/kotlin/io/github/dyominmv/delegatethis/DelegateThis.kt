@@ -12,7 +12,7 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.writeBytes
 
 /**
- * basic class to implement plugin for specified build tool.
+ * basic class to implement plugin for specific build tool.
  *
  * @param modifiableClassesRoots paths to classes to be modified, usually something like target/classes
  * @param unmodifiableClassesLoader classLoader with access to all dependencies accessible from classes to be modified
