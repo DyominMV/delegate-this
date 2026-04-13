@@ -1,10 +1,10 @@
-# База для плагина delegate-this
+# Base for delegate-this plugin
 
-Трансформация классов лежит тут. Чтобы адаптировать плагин к системе сборки, нужно добавить в систему сборки действие, 
-которое бы выполняло следующий код:
+Class transformation happens here. To adapt the plugin to the build system, you need to add an action to the build system,
+which would execute the following code:
 ```kotlin
 DelegateThis(
-    modifiableClassRoots = TODO("Пути к папкам с файлами .class, например build/classes или target/classes"),
-    unmodifiableClassesLoader = TODO("Класслоадер с доступом к классам в зависимостях проекта")
+    modifiableClassRoots = TODO("Paths to folders with .class files, such as build/classes or target/classes"),
+    unmodifiableClassesLoader = TODO("Classloader with access to classes in project dependencies")
 ).execute()
 ```

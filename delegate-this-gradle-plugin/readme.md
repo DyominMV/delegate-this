@@ -1,7 +1,7 @@
 # delegate-this-gradle-plugin
 
-Этот плагин содержит и подключает таски для модификации байткода классов на котлине так, чтобы работала темка с 
-[delegate-this](../delegate-this/readme.md).
+This plugin contains and connects tasks for modifying the bytecode of classes in kotlin so that the trick with
+[delegate-this](../delegate-this/readme_en.md) works.
 
-Примеры подключения плагина см. в [примере-1](../gradle-example/build.gradle.kts) и 
-[примере-2](../gradle-example-2/build.gradle.kts)
+For examples of connecting the plugin, see [example-1](../gradle-example/build.gradle.kts) and
+[example-2](../gradle-example-2/build.gradle.kts)

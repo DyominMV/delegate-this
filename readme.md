@@ -1,14 +1,20 @@
-# Что в коробочке? 
+This repository contains kotlin library and plugins to add the following abilities:
 
-Популярный [by-computed](by-computed/readme.md) и его дед, легендарный [delegate-this](delegate-this/readme.md)
+## Access the delegating object reference from the delegate object with [delegate-this](delegate-this)
+  ```kotlin
+  class Sample: SomeInterface by SomeDelegate()
 
-Вместе они позволяют делегировать интерфейс изменяемому свойству:
-```kotlin
-interface SomeInterface{ /* ... */ }
+  class SomeDelegate: SomeInterface, Delegate {
+      override fun receiveDelegator(delegator: Any) {
+          // here delegator is instance of Sample or other class 
+          // that delegates to SomeDelegate 
+      } 
+  }
+  ```
 
-class Sample(
-    var x: SomeInterface
-): SomeInterface by property(Sample::x)
-```
+## Delegation of interface to a variable property via [by-computed](by-computed)
+  ```kotlin
+  interface SomeInterface{ /* ... */ }
 
-[same text in English](readme_en.md)
+  class Sample(var x: SomeInterface): SomeInterface by property(Sample::x)
+  ```

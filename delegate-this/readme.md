@@ -1,82 +1,84 @@
 # delegate-this
 
-Наконец-то в котлине делегат интерфейса может использовать ссылку на делегатора!
-> _вы ждали этого всю жизнь, я знаю_
+Finally in Kotlin, an interface delegate can use a reference to the delegator!
 
-## Введение
+> _you've been waiting for this all your life, I know_
 
-### Почему это плохо
+## Introduction
 
-Вообще-то во время создания делегата конструирование `this` ещё не завершено. Скорее всего именно из-за этого котлин 
-изначально даже не даёт использовать `this` в выражении после слова `by`. Мало того, даже с таким великолепно безопасным
-подходом, как в этом плагине, можно словить удивительные эффекты, если попытаться делегировать несколько интерфейсов 
-нескольким разным делегатам, и для одного из них рассчитывать на корректную реализацию другого.
+### Why it's bad
 
-### Почему это хорошо
+Actually, when a delegate is created, the construction of `this` is not yet complete. Most likely, this is why kotlin
+initially does not even allow using `this` in the expression after the `by` word. Moreover, even with such a wonderfully
+safe approach as in this plugin, you can catch surprising effects if you try to delegate several interfaces
+to several different delegates, and for one of them rely on the correct implementation of the other.
 
-Вообще-то бывает полезно делегировать определённую логику по-разному в зависимости от состояния объекта. И если эта
-логика описана довольно большим интерфейсом, то будет неприятно в каждом его методе писать однообразные ифы.
+### Why it's good
 
-> _Использовать в таких целях прокси ещё хуже, чем разрешать получать ссылку на делегатора_
+Actually, it can be useful to delegate certain logic differently depending on the state of the object. And if this
+logic is described by a fairly large interface, then it will be unpleasant to write the same `if`s in each of its
+methods.
 
-## Применение
+> _Using a proxy for such purposes is even worse than allowing a link to the delegator_
 
-### 1. Плагины
+## Usage
 
-Просто так получить ссылку на делегатора не получится, сначала придётся добавить немного магии трансформации байткода.
-Для этого реализованы плагины `delegate-this-(maven|gradle)-plugin`:
+### 1. Plugins
 
-- мавен:
-   ```xml
-   <plugins>
-       <plugin>
-           <groupId>io.github.dyominmv</groupId>
-           <artifactId>delegate-this-maven-plugin</artifactId>
-           <version>${актуальная версия}</version>
-           <executions>
-               <execution>
-                   <id>compile</id>
-                   <phase>compile</phase>
-                   <goals><goal>transform-delegators</goal></goals>
-               </execution>
-               <execution>
-                   <id>test-compile</id>
-                   <phase>test-compile</phase>
-                   <goals><goal>transform-test-delegators</goal></goals>
-               </execution>
-           </executions>
-       </plugin>
-   </plugins>
-   ```
-- градле:
-   ```kts
-   plugins {
-       id("io.github.dyominmv.delegate-this-gradle-plugin") version "актуальная версия"
-   }
-   ```
+You won't be able to just get a link to the delegator, you'll have to add a little bytecode transformation magic first.
+For this, the `delegate-this-(maven|gradle)-plugin` plugins are implemented:
 
-### 2. Зависимости
+- maven:
+ ```xml
+ <plugins>
+     <plugin>
+        <groupId>io.github.dyominmv</groupId>
+            <artifactId>delegate-this-maven-plugin</artifactId>
+            <version>${current version}</version>
+            <executions>
+                <execution>
+                    <id>compile</id>
+                    <phase>compile</phase>
+                    <goals><goal>transform-delegators</goal></goals>
+                </execution>
+                <execution>
+                    <id>test-compile</id>
+                    <phase>test-compile</phase>
+                    <goals><goal>transform-test-delegators</goal></goals>
+                </execution>
+            </executions>
+        </plugin>
+ </plugins>
+```
+- gradle:
+```kts
+plugins {
+    id("io.github.dyominmv.delegate-this-gradle-plugin") version "current version"
+}
+```
 
-Если хотите получать ссылку на делегатора в своём делегате, то кроме подключения плагинов понадобится добавить 
-зависимость на `delegate-this`.
+### 2. Dependencies
 
-- мавен:
-   ```xml
-   <dependency>
-       <groupId>io.github.dyominmv</groupId>
-       <artifactId>delegate-this</artifactId>
-       <version>${актуальная версия}</version>
-   </dependency>
-   ```
-- градле:
-   ```kts
-       implementation("io.github.dyominmv", "delegate-this", "актуальная версия")
-   ```
+If you want to get a reference to the delegator in your delegate, then in addition to connecting plugins, you will need
+to add a dependency on `delegate-this`.
 
-### 3. Получаем ссылку на делегатора внутри делегата
+- maven:
+```xml
+<dependency>
+    <groupId>io.github.dyominmv</groupId>
+    <artifactId>delegate-this</artifactId>
+    <version>${current version}</version>
+</dependency>
+```
+- gradle:
+```kts
+implementation("io.github.dyominmv", "delegate-this", "current version")
+```
 
-Выражение, которым инициализируется делегат, должно возвращать реализацию интерфейса Delegate.
-Например, так:
+### 3. Get a reference to the delegator inside the delegate
+
+The expression that initializes the delegate must return an implementation of the Delegate interface.
+For example, like this:
 
 ```kotlin
 interface Animal {
@@ -95,22 +97,21 @@ class Cat : Animal, Delegate {
 class AnimalDelegator: Animal by Cat()
 ```
 
-## Как это работает?
+## How it works
 
-Суть трансформации в следующем:
-1. Среди только что скомпилированных class-файлов выискиваются те, у которых есть поля-наследники типа Delegate. Дальше 
-имеем дело только с такими классами, у которых такие поля есть.
-2. В класс добавляется приватный метод `delegate_this!()`, который каждому полю-делегату 
-передаёт `this` (через вызов метода `receiveDelegator`)
-3. Каждый конструктор класса делается приватным и в него добавляется пустой параметр-маркер (соответственно заменяются 
-и вызовы этих конструкторов внутри изменённых конструкторов, _ну вы поняли_)
-4. Возвращаются конструкторы с оригинальной сигнатурой, но внутри они сначала вызывают того своего изменённого клона, а 
-затем смачно делают `delegate_this!()`
+1. Among the just compiled class files, those are found that have fields that are descendants of the Delegate type.
+   Further we deal only with those classes that have such fields.
+2. A private method `delegate_this!()` is added to the class, which passes `this` to each delegate field (by calling the
+   `receiveDelegator` method)
+3. Each class constructor is made private and an empty marker parameter is added to it (accordingly, the calls to these
+   constructors inside the modified constructors are replaced, _well, you get the idea_)
+4. Constructors with the original signature are returned, but inside they first call their modified clone, and
+   then they call `delegate_this!()`
 
-Всё это сделано, чтобы метод `receiveDelegator` был вызван только однажды сразу после логики конструирования объекта -
-делегатора.
+All this is done so that the `receiveDelegator` method is called only once, immediately after the logic of constructing
+the delegate object.
 
-## Для чего это делалось в первую очередь
+## Initial reason for doing all that
 
-Чтобы можно было делегировать интерфейсы изменяемым свойствам! Проект [by-computed](../by-computed/readme.md) как раз 
-про это.
+The ability to delegate interfaces to mutable properties. The [by-computed](../by-computed/readme_en.md) project is
+exactly about this.

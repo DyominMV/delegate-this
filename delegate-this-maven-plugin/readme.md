@@ -1,13 +1,34 @@
 # delegate-this-maven-plugin
 
-Этот плагин содержит goal-ы для модификации байткода классов на котлине так, чтобы работала темка с
-[delegate-this](../delegate-this/readme.md).
+This plugin contains goals for modifying the bytecode of classes in kotlin so that the trick with
+[delegate-this](../delegate-this) works.
 
-Пример подключения плагина см. в [библиотеке by-computed](../by-computed/pom.xml).
+For an example of connecting the plugin, see [the by-computed library](../by-computed/pom.xml).
 
-К сожалению, почему-то goal-ы не запускаются автоматически при запуске тестов через зелёный треугольник в идее, поэтому 
-приходится прожимать такую галку в настройках: 
+Unfortunately, for some reason the goals do not run automatically when running tests via the green triangle in the
+intellij idea, so you have to click on this checkbox in the settings:
 `settings -> Build, Execution, Deployment -> Maven -> Runner -> delegate IDE build/run actions to Maven`
 
+## Usage
 
-
+1. Add the following to the `build`/`plugins` section of your pom.xml:
+   ```xml
+   <plugin>
+       <groupId>io.github.dyominmv</groupId>
+       <artifactId>delegate-this-maven-plugin</artifactId>
+       <version>1.0.0</version>
+       <executions>
+           <execution>
+               <id>compile</id>
+               <phase>compile</phase>
+               <goals><goal>transform-delegators</goal></goals>
+           </execution>
+           <execution>
+               <id>test-compile</id>
+               <phase>test-compile</phase>
+               <goals><goal>transform-test-delegators</goal></goals>
+           </execution>
+       </executions>
+   </plugin>
+   ```
+2. By default, classes to be transformed are searched for in your projects `classes` and ``

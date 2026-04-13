@@ -25,7 +25,7 @@ dependencies {
 }
 
 gradlePlugin {
-    website = "https://github.com/dyominmv/delegate-this"
+    website = "https://github.com/dyominmv/delegate-this/tree/master/delegate-this-gradle-plugin"
     vcsUrl = "https://github.com/dyominmv/delegate-this.git"
     plugins {
         create("delegateThis") {

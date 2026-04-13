@@ -1,19 +1,16 @@
 # by-computed
 
-Наконец-то в котлине можно делегировать интерфейсы изменяемым полям
-> _вы ждали этого всю жизнь, я знаю_
+Finally, you can delegate interfaces to mutable fields in kotlin
 
-Выглядит это как-то так:
+It looks something like this:
 ```kotlin
 class Sample(
-    var id: Long,
-    var name: String,
+var id: Long,
+var name: String,
 ): EqualsHashcode by properties(Sample::id, Sample::name)
 ```
 
-Работает на основе плагина [delegate-this](../delegate-this/readme.md), так что кроме зависимости, нужно подключить ещё
-и его.
+It works based on the [delegate-this](../delegate-this/readme.md) plugin, so in addition to the dependency, you also
+need to connect it.
 
-Свойствам класса можно делегировать equals, hashcode, toString и compareTo.
-
-Ну и все классы открытые, так что можно городить сколько угодно своей логики (наверное)
+You can delegate `equals`, `hashCode`, `toString` and `compareTo` to class properties.
