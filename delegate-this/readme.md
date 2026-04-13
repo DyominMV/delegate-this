@@ -113,5 +113,5 @@ the delegate object.
 
 ## Initial reason for doing all that
 
-The ability to delegate interfaces to mutable properties. The [by-computed](../by-computed/readme_en.md) project is
+The ability to delegate interfaces to mutable properties. The [by-computed](../by-computed/readme.md) project is
 exactly about this.
