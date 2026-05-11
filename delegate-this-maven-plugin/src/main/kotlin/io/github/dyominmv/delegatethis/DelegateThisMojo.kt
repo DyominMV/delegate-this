@@ -29,7 +29,7 @@ abstract class DelegateThisMojoBase : AbstractMojo() {
 @Mojo(name = "transform-delegators")
 class DelegateThisMojo : DelegateThisMojoBase() {
 
-    @Parameter(defaultValue = "\${project}", readonly = true, required = true)
+    @Parameter(defaultValue = $$"${project}", readonly = true, required = true)
     fun setProject(project: MavenProject) {
         this.classpath = project.runtimeClasspathElements.map { it as String }
     }
@@ -50,7 +50,7 @@ class DelegateThisMojo : DelegateThisMojoBase() {
 @Mojo(name = "transform-test-delegators")
 class DelegateThisTestsMojo : DelegateThisMojoBase() {
 
-    @Parameter(defaultValue = "\${project}", readonly = true, required = true)
+    @Parameter(defaultValue = $$"${project}", readonly = true, required = true)
     fun setProject(project: MavenProject) {
         this.classpath = project.testClasspathElements.map { it as String }
     }
@@ -61,7 +61,7 @@ class DelegateThisTestsMojo : DelegateThisMojoBase() {
      */
     @Parameter(
         readonly = false,
-        defaultValue = "\${project.build.testOutputDirectory},\${project.build.outputDirectory}"
+        defaultValue = $$"${project.build.testOutputDirectory},${project.build.outputDirectory}"
     )
     fun setBuildTestOutputDirectories(dirs: Array<String>) {
         this.directoriesWithClasses = dirs.map { Path.of(it).absolute() }

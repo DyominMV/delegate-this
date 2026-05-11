@@ -1,7 +1,7 @@
 plugins {
     id("com.gradle.plugin-publish") version "1.3.1"
     signing
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.3.20"
 }
 
 repositories {
@@ -17,11 +17,11 @@ buildscript {
 }
 
 group = "io.github.dyominmv"
-version = "1.0.0"
+version = "1.1.1"
 
 dependencies {
-    api("io.github.dyominmv", "delegate-this-plugin-base", version.toString())
-    implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "2.1.0")
+    api("io.github.dyominmv:delegate-this-plugin-base:$version")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20")
 }
 
 gradlePlugin {
@@ -39,7 +39,40 @@ gradlePlugin {
 }
 
 publishing {
-    repositories { mavenLocal() }
+    repositories {
+        maven {
+            url = uri("file:///${System.getProperty("user.home")}/local-repository")
+            name = "dev"
+        }
+    }
+    publications {
+        withType<MavenPublication> {
+            pom {
+                name = rootProject.name
+                groupId = rootProject.group.toString()
+                licenses {
+                    license {
+                        name = "MIT License"
+                        url = "http://www.opensource.org/licenses/mit-license.php"
+                    }
+                }
+                developers {
+                    developer {
+                        name = "Mikhail Dyomin"
+                        email = "m.v.dyomin@mail.ru"
+                        organizationUrl = "https://github.com/DyominMV"
+                    }
+                }
+                scm {
+                    connection = "scm:git:git://github.com/DyominMV/delegate-this.git"
+                    developerConnection = "scm:git:ssh://github.com:DyominMV/delegate-this.git"
+                    url = "https://github.com/DyominMV/delegate-this/tree/master"
+                }
+                url = "https://github.com/DyominMV/delegate-this/tree/master/"
+                description = "Gradle plugin to transform delegators in order to initialize instances of Delegate"
+            }
+        }
+    }
 }
 
 signing { useGpgCmd() }

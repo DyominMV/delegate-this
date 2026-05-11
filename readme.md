@@ -6,8 +6,7 @@ This repository contains kotlin library and plugins to add the following abiliti
 
   class SomeDelegate: SomeInterface, Delegate {
       override fun receiveDelegator(delegator: Any) {
-          // here delegator is instance of Sample or other class 
-          // that delegates to SomeDelegate 
+          // here delegator is expected to be an instance of Sample or other class that delegates to SomeDelegate 
       } 
   }
   ```

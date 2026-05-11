@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.1.10"
-    id("io.github.dyominmv.delegate-this-gradle-plugin") version "1.0.0"
+    kotlin("jvm") version "2.3.20"
+    id("io.github.dyominmv.delegate-this-gradle-plugin") version "1.1.1"
 }
 
 group = "io.github.dyominmv"
@@ -12,16 +12,14 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.dyominmv", "by-computed", "1.0.0")
-
-    testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.8.1")
-    testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.8.1")
+    implementation("io.github.dyominmv:by-computed:1.1.1")
 }
 
-tasks.test {
-    useJUnitPlatform()
+// required to run from intellij idea
+tasks.withType<JavaExec> {
+    dependsOn(tasks.transformDelegators)
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }

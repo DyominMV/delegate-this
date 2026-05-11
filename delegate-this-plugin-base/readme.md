@@ -1,7 +1,6 @@
 # Base for delegate-this plugin
 
-Class transformation happens here. To adapt the plugin to the build system, you need to add an action to the build system,
-which would execute the following code:
+Class transformation happens here. To use it within your build script run following:
 ```kotlin
 DelegateThis(
     modifiableClassRoots = TODO("Paths to folders with .class files, such as build/classes or target/classes"),
